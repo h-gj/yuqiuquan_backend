@@ -21,7 +21,7 @@ from main.views import get_wx_token, add_changdi_sub, monitor
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    path('/', get_wx_token),
+    path('get_token/', get_wx_token),
     path('sub/', add_changdi_sub),
     path('monitor/', monitor),
 ]
