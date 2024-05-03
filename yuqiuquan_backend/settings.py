@@ -38,16 +38,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'yuqiuquan_backend.urls'
@@ -74,10 +76,33 @@ WSGI_APPLICATION = 'yuqiuquan_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+
+from sshtunnel import SSHTunnelForwarder
+
+
+def create_ssh_tunnel():
+    server = SSHTunnelForwarder(
+        ('47.106.82.158', 22),  # SSH server address
+        ssh_username='root',
+        ssh_password='123123hgj...',
+        remote_bind_address=('127.0.0.1', 3306)  # MySQL server address
+    )
+    server.start()
+    return server
+
+
+ssh_tunnel = create_ssh_tunnel()
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'yuqiuquan',
+        'USER': 'root',
+        'PASSWORD': '123456',
+        'HOST': '127.0.0.1',
+        'PORT': ssh_tunnel.local_bind_port,  # Local port of SSH tunnel
+
     }
 }
 
@@ -105,16 +130,59 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# 设置邮件后端
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# SMTP服务器配置
+EMAIL_HOST = 'smtp.qq.com'  # 你的SMTP服务器地址
+EMAIL_PORT = 587  # SMTP服务器端口号
+EMAIL_USE_TLS = True  # 是否使用TLS加密连接
+
+# 发件人邮箱设置
+EMAIL_HOST_USER = '690631890@qq.com'  # 发件人邮箱
+EMAIL_HOST_PASSWORD = 'zfvqprbhqtbwbbjh'  # 发件人邮箱密码
+
+# 默认发件人
+DEFAULT_FROM_EMAIL = '690631890@qq.com'
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:3000",
+    "http://yuqiuquan.com",
+]
+
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'PUT',
+    'DELETE',
+    'OPTIONS'
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+

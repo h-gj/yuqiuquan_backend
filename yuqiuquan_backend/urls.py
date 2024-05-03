@@ -15,10 +15,13 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.urls import path
 
-from main.views import get_wx_token
+from main.views import get_wx_token, add_changdi_sub, monitor
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url('', get_wx_token),
+    path('/', get_wx_token),
+    path('sub/', add_changdi_sub),
+    path('monitor/', monitor),
 ]
